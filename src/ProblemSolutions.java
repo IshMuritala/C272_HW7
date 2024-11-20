@@ -32,18 +32,30 @@ public class ProblemSolutions {
         selectionSort(values, true);
     }
 
-    public static void selectionSort(int[] values, boolean ascending ) {
-
+    public static void selectionSort(int[] values, boolean ascending) {
         int n = values.length;
 
         for (int i = 0; i < n - 1; i++) {
+            int selectedIdx = i;
 
-            // YOU CODE GOES HERE -- COMPLETE THE INNER LOOP OF THIS
-            // "SELECTION SORT" ALGORITHM.
-            // DO NOT FORGET TO ADD YOUR NAME / SECTION ABOVE
+            // Find the index of the min/max element
+            for (int j = i + 1; j < n; j++) {
+                if (ascending) {
+                    if (values[j] < values[selectedIdx]) {
+                        selectedIdx = j;
+                    }
+                } else {
+                    if (values[j] > values[selectedIdx]) {
+                        selectedIdx = j;
+                    }
+                }
+            }
 
+            // Swap element with element at i
+            int temp = values[selectedIdx];
+            values[selectedIdx] = values[i];
+            values[i] = temp;
         }
-
     } // End class selectionSort
 
 
@@ -65,6 +77,8 @@ public class ProblemSolutions {
      * @param values    - input array to sort per definition above
      * @param k         - value k, such that all numbers divisible by this value are first
      */
+
+
 
     public void mergeSortDivisibleByKFirst(int[] values, int k) {
 
@@ -90,21 +104,87 @@ public class ProblemSolutions {
      * The merging portion of the merge sort, divisible by k first
      */
 
-    private void mergeDivisbleByKFirst(int arr[], int k, int left, int mid, int right)
-    {
-        // YOUR CODE GOES HERE, THIS METHOD IS NO MORE THAN THE STANDARD MERGE PORTION
-        // OF A MERGESORT, EXCEPT THE NUMBERS DIVISIBLE BY K MUST GO FIRST WITHIN THE
-        // SEQUENCE PER THE DISCUSSION IN THE PROLOGUE ABOVE.
-        //
-        // NOTE: YOU CAN PROGRAM THIS WITH A SPACE COMPLEXITY OF O(1) OR O(N LOG N).
-        // AGAIN, THIS IS REFERRING TO SPACE COMPLEXITY. O(1) IS IN-PLACE, O(N LOG N)
-        // ALLOCATES AUXILIARY DATA STRUCTURES (TEMPORARY ARRAYS). IT WILL BE EASIER
-        // TO CODE WITH A SPACE COMPLEXITY OF O(N LOG N), WHICH IS FINE FOR PURPOSES
-        // OF THIS PROGRAMMING EXERCISES.
 
-        return;
 
+
+    private void mergeDivisbleByKFirst(int arr[], int k, int left, int mid, int right) {
+        int n1 = mid - left + 1;
+        int n2 = right - mid;
+
+        // Create temporary arrays
+        int[] L = new int[n1];
+        int[] R = new int[n2];
+
+        // Copy data to temporary arrays
+        for (int i = 0; i < n1; i++) {
+            L[i] = arr[left + i];
+        }
+        for (int i = 0; i < n2; i++) {
+            R[i] = arr[mid + 1 + i];
+        }
+
+        int i = 0, j = 0, m = left;
+
+        // First merge phase: numbers divisible by k
+        // Keep their orig order (from left to right)
+        while (i < n1 && j < n2) {
+            boolean isLeftDivisible = L[i] % k == 0;
+            boolean isRightDivisible = R[j] % k == 0;
+
+            if (isLeftDivisible && isRightDivisible) {
+                // When both are divisible, take from left first to keep order
+                arr[m++] = L[i++];
+            } else if (isLeftDivisible) {
+                arr[m++] = L[i++];
+            } else if (isRightDivisible) {
+                arr[m++] = R[j++];
+            } else {
+                break; // Neither is divisible, move to second phase
+            }
+        }
+
+        // Complete any remaining divisible numbers
+        while (i < n1 && L[i] % k == 0) {
+            arr[m++] = L[i++];
+        }
+        while (j < n2 && R[j] % k == 0) {
+            arr[m++] = R[j++];
+        }
+
+        // Second merge phase: merge remaining non-divisible numbers in sorted order
+        while (i < n1 && j < n2) {
+            if (L[i] % k != 0 && R[j] % k != 0) {
+                if (L[i] <= R[j]) {
+                    arr[m++] = L[i++];
+                } else {
+                    arr[m++] = R[j++];
+                }
+            } else if (L[i] % k == 0) {
+                i++;
+            } else if (R[j] % k == 0) {
+                j++;
+            }
+        }
+
+        // Copy remaining non-divisible elements
+        while (i < n1) {
+            if (L[i] % k != 0) {
+                arr[m++] = L[i];
+            }
+            i++;
+        }
+        while (j < n2) {
+            if (R[j] % k != 0) {
+                arr[m++] = R[j];
+            }
+            j++;
+        }
     }
+
+
+
+
+
 
 
     /**
@@ -153,11 +233,23 @@ public class ProblemSolutions {
      */
 
     public static boolean asteroidsDestroyed(int mass, int[] asteroids) {
+        // Sort the asteroids array
+        Arrays.sort(asteroids);
 
-        // YOUR CODE GOES HERE, CONSIDER USING ARRAYS.SORT()
+        // Long to avoid integer
+        long currentMass = mass;
 
-        return false;
+        // Try to destroy each asteroid in order
+        for (int asteroid : asteroids) {
+            // If current mass is less than asteroid mass, we can't destroy it
+            if (currentMass < asteroid) {
+                return false;
+            }
+            // Add the asteroid's mass to my mass
+            currentMass += asteroid;
+        }
 
+        return true;
     }
 
 
@@ -191,11 +283,29 @@ public class ProblemSolutions {
      */
 
     public static int numRescueSleds(int[] people, int limit) {
+        // Sort the array to make it easier to pair people
+        Arrays.sort(people);
 
-        // YOUR CODE GOES HERE, CONSIDER USING ARRAYS.SORT
+        int sleds = 0;
+        int left = 0;                    // Index for lightest person
+        int right = people.length - 1;   // Index for heaviest person
 
-        return -1;
+        // Use two pointers approach to pair people
+        while (left <= right) {
+            // If we can fit both the heaviest and lightest person
+            if (left < right && people[left] + people[right] <= limit) {
+                left++;
+                right--;
+                sleds++;
+            }
 
+            else {
+                right--;
+                sleds++;
+            }
+        }
+
+        return sleds;
     }
 
 } // End Class ProblemSolutions
